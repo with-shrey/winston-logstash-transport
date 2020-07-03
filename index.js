@@ -1,80 +1,69 @@
+const winston = require('winston');
+const LogstashTransport = require('./transport');
+const LOG_LEVEL = process.env.LOG_LEVEL || 'debug';
+const NODE_ENV = process.env.NODE_ENV || 'development';
 
-const dgram = require('dgram')
-const os = require('os')
+/**
+ * Winston by default doesn't support printing javascript
+ * error object. This function configures winston to print
+ * javascript objects
+ * Reference: https://github.com/winstonjs/winston/issues/1338#issuecomment-403289827
+ * @type {any}
+ */
+const print = winston.format((info) => {
 
-const winston = require('winston')
-
-/* eslint-disable no-empty-function */
-function noop() {}
-/* eslint-enable no-empty-function */
-
-class LogstashTransport extends winston.Transport {
-  constructor(options) {
-    options = options || {}
-
-    super(options)
-
-    this.name = 'LogstashTransport'
-
-    this.host = options.host
-    this.port = options.port
-    this.trailingLineFeed = options.trailingLineFeed === true
-    this.trailingLineFeedChar = options.trailingLineFeedChar || os.EOL
-    this.silent = options.silent
-
-    this.client = null
-
-    this.connect()
-  }
-
-  connect() {
-    this.client = dgram.createSocket('udp4')
-    this.client.unref()
-  }
-
-  log(info, callback) {
-    if (this.silent) {
-      return callback(null, true)
+  let infoKeys = Object.keys(info);
+  for (let i = 0; i<infoKeys.length; i++) {
+    if (info[infoKeys[i]] instanceof Error) {
+      info.error = info[infoKeys[i]].message;
+      info.stack = info[infoKeys[i]].stack;
     }
-
-    this.send(info[Symbol.for('message')], (err) => {
-      this.emit('logged', !err)
-      callback(err, !err)
-    })
   }
+  return info;
+});
 
-  send(message, callback) {
-    if (this.trailingLineFeed === true) {
-      message = message.replace(/\s+$/, '') + this.trailingLineFeedChar
-    }
+const logger = function (scope) {
 
-    const buf = Buffer.from(message)
-    this.client.send(buf, 0, buf.length, this.port, this.host, (callback || noop))
+// If we're not in production then log to the `console` with the format:
+// `${info.level}: ${info.message} JSON.stringify({ ...rest }) `
+//
+  let log;
+  if (NODE_ENV === 'development') {
+    log = winston.createLogger({
+        level: LOG_LEVEL,
+        defaultMeta: {scope: scope, application: process.env.APPLICATION_NAME},
+        transports: [
+          new winston.transports.Console({
+              format: winston.format.combine(
+                print(),
+                winston.format.colorize(),
+                winston.format.simple(),
+              ),
+            })
+        ]
+      }
+    );
   }
-}
+  else if(NODE_ENV === 'staging' || NODE_ENV === 'production') {
+    log = LogstashTransport.createLogger(null, {
+      level: LOG_LEVEL,
+      logstash: {
+        host: process.env.LOGSTASH_SERVER_IP,
+        port: process.env.LOGSTASH_PORT
+      },
+      application: process.env.APPLICATION_NAME,
+      hostname: process.env.HOST_NAME,
+      format: winston.format.combine(
+        print(),
+        winston.format.simple(),
+        winston.format.json(),
+        winston.format.timestamp(),
+      ),
+      defaultMeta: {scope: scope},
+    });
+  }
+  return log;
+};
 
-function createLogger(logType, config) {
-  const appendMetaInfo = winston.format((info) => {
-    return Object.assign(info, {
-      application: logType || config.application,
-      hostname: config.hostname || os.hostname(),
-      pid: process.pid,
-      time: new Date(),
-    })
-  })
-  
-  return winston.createLogger({
-    level: config.level || 'info',
-    format: winston.format.combine(
-      appendMetaInfo(),
-      winston.format.json(),
-      winston.format.timestamp()
-    ),
-    transports: [
-      new LogstashTransport(config.logstash)
-    ].concat(config.transports || [])
-  })
-}
 
-exports.LogstashTransport = LogstashTransport
-exports.createLogger = createLogger
+module.exports = logger;

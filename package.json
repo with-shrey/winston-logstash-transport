@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/liuyanjie/winston-logstash-transport.git"
+    "url": "git+https://github.com/kamal0808/winston-logstash-transport.git"
   },
   "keywords": [
     "winston",
@@ -16,14 +16,13 @@
     "transport",
     "winston-logstash-transport"
   ],
-  "author": "liuyanjie",
+  "author": "kamal0808",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/liuyanjie/winston-logstash-transport/issues"
+    "url": "https://github.com/kamal0808/winston-logstash-transport/issues"
   },
-  "homepage": "https://github.com/liuyanjie/winston-logstash-transport#readme",
+  "homepage": "https://github.com/kamal0808/winston-logstash-transport#readme",
   "dependencies": {
-    "@types/winston": "^2.3.9",
-    "winston": "^3.0.0"
+    "winston": "3.3.3"
   }
 }
