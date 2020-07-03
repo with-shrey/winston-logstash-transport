@@ -1,43 +1,46 @@
 # winston-logstash-transport
 
+Writes logs to logstash using UDP, or to console for development environment.
+
+Fixes winston issue for logging Javascript error object 
+https://github.com/winstonjs/winston/issues/1338
+
 ## Example
 
 ```js
-const logger = require('winston-logstash-transport').createLogger(null, {
-  application: 'website-ssr-prod',
-  logstash: {host: 'logstash-host', port: 12345},
-  transports: [
-    new winston.transports.Console(),
-  ]
-})
+
+const logger = require('winston-logstash-transport')(__filename);
+
+logger.info({
+  message: 'Some message here',
+  data,
+  functionName: 'blah'
+});
+
+logger.debug({
+  message: 'Some message here',
+  data: {
+    blah: 'blah'
+  }
+});
+
+logger.error({
+  message: 'Some message here',
+  error
+});
 ```
 
-```js
-const logger = winston.createLogger({
-    level: 'info',
-    format: winston.format.combine(
-      winston.format.json(),
-      winston.format.timestamp()
-    ),
-    transports: [
-      new winston.transports.Console(),
-      new LogstashTransport({host: 'logstash-host', port: 12345})
-    ]
-  })
-```
 
-## API
+## Environment Variables
 
-* `class LogstashTransport`
+* LOG_LEVEL = `error | warn | info | http | verbose | debug | silly` `[default = debug]`
 
-  * `options`
-  * `options.host`, logstash host
-  * `options.port`, logstash UDP port
+* NODE_ENV = `development | staging | production` `[default = development]`
 
-* `createLogger()`
+* APPLICATION_NAME = `your_app_name`
+ 
+* LOGSTASH_SERVER_IP = `xxx.xxx.xxx.xxx`
 
-  * `application`, The name of application
-  * `hostname=os.hostname()`, The host where application run on.
-  * `level='info'`, log level
-  * `transports=[]`, others transports for winston
-  * `logstash`, options for LogstashTransport
+* LOGSTASH_PORT = `xxxx`
+
+* HOST_NAME = `host_name`
