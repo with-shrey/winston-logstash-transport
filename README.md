@@ -1,4 +1,4 @@
-# winston-logstash-transport
+# winston-logstash-transporter
 
 Writes logs to logstash using UDP, or to console for development environment.
 
@@ -9,7 +9,7 @@ https://github.com/winstonjs/winston/issues/1338
 
 ```js
 
-const logger = require('winston-logstash-transport')(__filename);
+const logger = require('winston-logstash-transporter')(__filename);
 
 logger.info({
   message: 'Some message here',
