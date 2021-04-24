@@ -37,6 +37,8 @@ logger.error({
 
 * NODE_ENV = `development | staging | production` `[default = development]`
 
+* SEND_TO_LOGSTASH = `true | false` `[default = false]`
+
 * APPLICATION_NAME = `your_app_name`
  
 * LOGSTASH_SERVER_IP = `xxx.xxx.xxx.xxx`
