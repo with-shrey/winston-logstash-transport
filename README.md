@@ -2,6 +2,21 @@
 
 Writes logs to logstash using UDP, or to console for development environment.
 
+In production or staging, logstash can be switched with a file based logging that rotates files based on the following transport
+
+https://github.com/winstonjs/winston-daily-rotate-file
+
+```
+new winston.transports.DailyRotateFile({
+    dirname: './logs',
+    filename: 'default-%DATE%.log',
+    datePattern: 'YYYY-MM-DD-HH',
+    zippedArchive: true,
+    maxSize: '20m',
+    maxFiles: '7d'
+});
+```
+
 Fixes winston issue for logging Javascript error object 
 https://github.com/winstonjs/winston/issues/1338
 
