@@ -4,10 +4,7 @@ require('winston-daily-rotate-file');
 const LOG_LEVEL = process.env.LOG_LEVEL || 'debug';
 const NODE_ENV = process.env.NODE_ENV || 'development';
 const SEND_TO_LOGSTASH = process.env.SEND_TO_LOGSTASH === 'true';
-let APPLICATION_NAME = process.env.APPLICATION_NAME;
-if(!APPLICATION_NAME) {
-  APPLICATION_NAME = require('../package.json').name || 'winston-logstash-transporter';
-}
+let APPLICATION_NAME = process.env.APPLICATION_NAME || 'winston-logstash-transporter';
 
 /**
  * Winston by default doesn't support printing javascript
@@ -55,7 +52,7 @@ const logger = function (scope) {
       let logDirectory = `/var/log/${APPLICATION_NAME}/application_log`;
       log = winston.createLogger({
             level: LOG_LEVEL,
-            defaultMeta: {scope: scope, application: APPLICATION_NAME},
+            defaultMeta: {scope: scope, application: APPLICATION_NAME, time: new Date()},
             transports: [
               new winston.transports.DailyRotateFile({
                 dirname: logDirectory,
@@ -90,5 +87,9 @@ const logger = function (scope) {
   }
   return log;
 };
+
+logger().debug({
+  message: 'hello'
+})
 
 module.exports = logger;
