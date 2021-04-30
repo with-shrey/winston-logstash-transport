@@ -6,25 +6,6 @@ const NODE_ENV = process.env.NODE_ENV || 'development';
 const SEND_TO_LOGSTASH = process.env.SEND_TO_LOGSTASH === 'true';
 let APPLICATION_NAME = process.env.APPLICATION_NAME || 'winston-logstash-transporter';
 
-/**
- * Winston by default doesn't support printing javascript
- * error object. This function configures winston to print
- * javascript objects
- * Reference: https://github.com/winstonjs/winston/issues/1338#issuecomment-403289827
- * @type {any}
- */
-const print = winston.format((info) => {
-
-  let infoKeys = Object.keys(info);
-  for (let i = 0; i < infoKeys.length; i++) {
-    if (info[infoKeys[i]] instanceof Error) {
-      info.error = info[infoKeys[i]].message;
-      info.stack = info[infoKeys[i]].stack;
-    }
-  }
-  return info;
-});
-
 const logger = function (scope) {
 
 // If we're not in production then log to the `console` with the format:
@@ -75,21 +56,11 @@ const logger = function (scope) {
         },
         application: APPLICATION_NAME,
         hostname: process.env.HOST_NAME,
-        format: winston.format.combine(
-            print(),
-            winston.format.simple(),
-            winston.format.json(),
-            winston.format.timestamp(),
-        ),
         defaultMeta: {scope: scope},
       });
     }
   }
   return log;
 };
-
-logger().debug({
-  message: 'hello'
-})
 
 module.exports = logger;
