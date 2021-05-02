@@ -1,6 +1,6 @@
 {
   "name": "winston-logstash-transporter",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "winston-logstash-transporter",
   "main": "index.js",
   "scripts": {

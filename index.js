@@ -59,7 +59,7 @@ const logger = function (scope) {
       );
     }
     else {
-      log = LogstashTransport.createLogger(null, {
+      log = LogstashTransport.createLogger({
         level: LOG_LEVEL,
         logstash: {
           host: process.env.LOGSTASH_SERVER_IP,
