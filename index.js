@@ -14,14 +14,22 @@ const logger = function (scope) {
 // `${info.level}: ${info.message} JSON.stringify({ ...rest }) `
 //
   let log;
+  let defaultMeta = () => {
+    return {
+      scope: scope,
+      application: APPLICATION_NAME,
+      get time() {
+        return moment().format();
+      }
+    }
+  };
   if (NODE_ENV === 'development') {
     log = winston.createLogger({
           level: LOG_LEVEL,
-          defaultMeta: {scope: scope, application: APPLICATION_NAME},
+          defaultMeta: defaultMeta(),
           transports: [
             new winston.transports.Console({
               format: winston.format.combine(
-                  print(),
                   winston.format.colorize(),
                   winston.format.simple(),
               ),
@@ -33,10 +41,9 @@ const logger = function (scope) {
   else if (NODE_ENV === 'staging' || NODE_ENV === 'production') {
     if (!SEND_TO_LOGSTASH) {
       let logDirectory = `/var/log/${APPLICATION_NAME}/application_log`;
-      let defaultMeta = {scope: scope, application: APPLICATION_NAME, time: moment().format()};
       log = winston.createLogger({
             level: LOG_LEVEL,
-            defaultMeta,
+            defaultMeta: defaultMeta(),
             format: print,
             transports: [
               new winston.transports.DailyRotateFile({
@@ -60,7 +67,7 @@ const logger = function (scope) {
         },
         application: APPLICATION_NAME,
         hostname: process.env.HOST_NAME,
-        defaultMeta: {scope: scope},
+        defaultMeta: defaultMeta(),
       });
     }
   }

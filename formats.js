@@ -13,7 +13,7 @@ const print = winston.format.printf((info, op) => {
       info.stack = info[eachKey].stack;
       info.error = info[eachKey].message;
     }
-    else if (info[eachKey] && info[eachKey].constructor.name === 'Object') {
+    else if (typeof info[eachKey] !== 'string'){
       info[eachKey] = JSON.stringify(info[eachKey]);
     }
   });
