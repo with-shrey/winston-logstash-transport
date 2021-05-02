@@ -1,6 +1,6 @@
 {
   "name": "winston-logstash-transporter",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "winston-logstash-transporter",
   "main": "index.js",
   "scripts": {
@@ -23,6 +23,7 @@
   },
   "homepage": "https://github.com/kamal0808/winston-logstash-transport#readme",
   "dependencies": {
+    "moment": "2.29.1",
     "winston": "3.3.3",
     "winston-daily-rotate-file": "4.5.2"
   }

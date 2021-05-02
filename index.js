@@ -5,6 +5,8 @@ const LOG_LEVEL = process.env.LOG_LEVEL || 'debug';
 const NODE_ENV = process.env.NODE_ENV || 'development';
 const SEND_TO_LOGSTASH = process.env.SEND_TO_LOGSTASH === 'true';
 let APPLICATION_NAME = process.env.APPLICATION_NAME || 'winston-logstash-transporter';
+const moment = require('moment');
+const print = require('./formats').print;
 
 const logger = function (scope) {
 
@@ -31,9 +33,11 @@ const logger = function (scope) {
   else if (NODE_ENV === 'staging' || NODE_ENV === 'production') {
     if (!SEND_TO_LOGSTASH) {
       let logDirectory = `/var/log/${APPLICATION_NAME}/application_log`;
+      let defaultMeta = {scope: scope, application: APPLICATION_NAME, time: moment().format()};
       log = winston.createLogger({
             level: LOG_LEVEL,
-            defaultMeta: {scope: scope, application: APPLICATION_NAME, time: new Date()},
+            defaultMeta,
+            format: print,
             transports: [
               new winston.transports.DailyRotateFile({
                 dirname: logDirectory,
