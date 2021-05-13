@@ -1,4 +1,5 @@
 const winston = require('winston')
+const CONSTANTS = require('./constants');
 
 /**
  * Winston by default doesn't support printing javascript
@@ -13,11 +14,11 @@ const print = winston.format.printf((info, op) => {
       info.stack = info[eachKey].stack;
       info.error = info[eachKey].message;
     }
-    else if (typeof info[eachKey] !== 'string'){
+    else if (typeof info[eachKey] !== 'string' && CONSTANTS.NODE_ENV !== 'development') {
       info[eachKey] = JSON.stringify(info[eachKey]);
     }
   });
-  return JSON.stringify(info);
+  return CONSTANTS.NODE_ENV === 'development' ? info : JSON.stringify(info);
 });
 
 module.exports = {

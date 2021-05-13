@@ -1,13 +1,9 @@
 const winston = require('winston');
 const LogstashTransport = require('./transport');
 require('winston-daily-rotate-file');
-const LOG_LEVEL = process.env.LOG_LEVEL || 'debug';
-const NODE_ENV = process.env.NODE_ENV || 'development';
-const SEND_TO_LOGSTASH = process.env.SEND_TO_LOGSTASH === 'true';
-let APPLICATION_NAME = process.env.APPLICATION_NAME || 'winston-logstash-transporter';
+const CONSTANTS = require('./constants');
 const moment = require('moment');
 const print = require('./formats').print;
-
 const logger = function (scope) {
 
 // If we're not in production then log to the `console` with the format:
@@ -17,19 +13,20 @@ const logger = function (scope) {
   let defaultMeta = () => {
     return {
       scope: scope,
-      application: APPLICATION_NAME,
+      application: CONSTANTS.APPLICATION_NAME,
       get time() {
         return moment().format();
       }
     }
   };
-  if (NODE_ENV === 'development') {
+  if (CONSTANTS.NODE_ENV === 'development') {
     log = winston.createLogger({
-          level: LOG_LEVEL,
+          level: CONSTANTS.LOG_LEVEL,
           defaultMeta: defaultMeta(),
           transports: [
             new winston.transports.Console({
               format: winston.format.combine(
+                  print,
                   winston.format.colorize(),
                   winston.format.simple(),
               ),
@@ -38,11 +35,11 @@ const logger = function (scope) {
         }
     );
   }
-  else if (NODE_ENV === 'staging' || NODE_ENV === 'production') {
-    if (!SEND_TO_LOGSTASH) {
-      let logDirectory = `/var/log/${APPLICATION_NAME}/application_log`;
+  else if (CONSTANTS.NODE_ENV === 'staging' || CONSTANTS.NODE_ENV === 'production') {
+    if (!CONSTANTS.SEND_TO_LOGSTASH) {
+      let logDirectory = `/var/log/${CONSTANTS.APPLICATION_NAME}/application_log`;
       log = winston.createLogger({
-            level: LOG_LEVEL,
+            level: CONSTANTS.LOG_LEVEL,
             defaultMeta: defaultMeta(),
             format: print,
             transports: [
@@ -60,13 +57,13 @@ const logger = function (scope) {
     }
     else {
       log = LogstashTransport.createLogger({
-        level: LOG_LEVEL,
+        level: CONSTANTS.LOG_LEVEL,
         logstash: {
-          host: process.env.LOGSTASH_SERVER_IP,
-          port: process.env.LOGSTASH_PORT
+          host: CONSTANTS.LOGSTASH_SERVER_IP,
+          port: CONSTANTS.LOGSTASH_PORT
         },
-        application: APPLICATION_NAME,
-        hostname: process.env.HOST_NAME,
+        application: CONSTANTS.APPLICATION_NAME,
+        hostname: CONSTANTS.HOST_NAME,
         defaultMeta: defaultMeta(),
       });
     }
