@@ -50,7 +50,11 @@ logger.error({
 
 * NODE_ENV = `development | staging | production` `[default = development]`
 
-* SEND_TO_LOGSTASH = `true | false` `[default = false]`
+* SEND_TO_LOGSTASH = `true | false` `[default = false]` //sends to logstash server in <LOGSTASH_SERVER_IP>
+
+* SEND_TO_FILE = `true | false` `[default = !SEND_TO_LOGSTASH]`  //sends logs to /var/log/<APPLICATION_NAME>/application_log/
+
+* SEND_TO_STDOUT = `true | false` `[default = true for development, false for production]` //prints to standard output (console).
 
 * APPLICATION_NAME = `your_app_name`
  

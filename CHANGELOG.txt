@@ -1,0 +1,3 @@
+v1.1.1
+- Breaking Change, use wisely
+- Provide stdout feature in env variable

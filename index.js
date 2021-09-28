@@ -6,9 +6,9 @@ const moment = require('moment');
 const print = require('./formats').print;
 const logger = function (scope) {
 
-// If we're not in production then log to the `console` with the format:
-// `${info.level}: ${info.message} JSON.stringify({ ...rest }) `
-//
+  // If we're not in production then log to the `console` with the format:
+  // `${info.level}: ${info.message} JSON.stringify({ ...rest }) `
+  //
   let log;
   let defaultMeta = () => {
     return {
@@ -21,39 +21,47 @@ const logger = function (scope) {
   };
   if (CONSTANTS.NODE_ENV === 'development') {
     log = winston.createLogger({
-          level: CONSTANTS.LOG_LEVEL,
-          defaultMeta: defaultMeta(),
-          transports: [
-            new winston.transports.Console({
-              format: winston.format.combine(
-                  print,
-                  winston.format.colorize(),
-                  winston.format.simple(),
-              ),
-            })
-          ]
-        }
-    );
+      level: CONSTANTS.LOG_LEVEL,
+      defaultMeta: defaultMeta(),
+      transports: [
+        new winston.transports.Console({
+          format: winston.format.combine(
+            print,
+            winston.format.colorize(),
+            winston.format.simple(),
+          ),
+        })
+      ]
+    });
   }
   else if (CONSTANTS.NODE_ENV === 'staging' || CONSTANTS.NODE_ENV === 'production') {
+    let transports = [];
+    if (CONSTANTS.SEND_TO_STDOUT)
+      transports.push(
+        new winston.transports.Console({
+          format: winston.format.combine(
+            print,
+            winston.format.colorize(),
+            winston.format.simple(),
+          ),
+        })
+      );
     if (!CONSTANTS.SEND_TO_LOGSTASH) {
       let logDirectory = `/var/log/${CONSTANTS.APPLICATION_NAME}/application_log`;
+      transports.push(new winston.transports.DailyRotateFile({
+        dirname: logDirectory,
+        filename: 'default-%DATE%.log',
+        datePattern: 'YYYY-MM-DD-HH',
+        zippedArchive: true,
+        maxSize: '20m',
+        maxFiles: '7d'
+      }));
       log = winston.createLogger({
-            level: CONSTANTS.LOG_LEVEL,
-            defaultMeta: defaultMeta(),
-            format: print,
-            transports: [
-              new winston.transports.DailyRotateFile({
-                dirname: logDirectory,
-                filename: 'default-%DATE%.log',
-                datePattern: 'YYYY-MM-DD-HH',
-                zippedArchive: true,
-                maxSize: '20m',
-                maxFiles: '7d'
-              })
-            ]
-          }
-      );
+        level: CONSTANTS.LOG_LEVEL,
+        defaultMeta: defaultMeta(),
+        format: print,
+        transports
+      });
     }
     else {
       log = LogstashTransport.createLogger({
@@ -67,6 +75,7 @@ const logger = function (scope) {
         defaultMeta: defaultMeta(),
       });
     }
+
   }
   return log;
 };
