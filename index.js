@@ -1,6 +1,6 @@
 const winston = require('winston');
 const LogstashTransport = require('./transport');
-require('winston-daily-rotate-file');
+winston.transports.DailyRotateFile = require('winston-daily-rotate-file');
 const CONSTANTS = require('./constants');
 const moment = require('moment');
 const print = require('./formats').print;
